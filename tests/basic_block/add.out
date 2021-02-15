@@ -1,0 +1,2 @@
+main:
+[Instruction(Constant { op: Const, dest: "v0", const_type: Int, value: Int(1) }), Instruction(Constant { op: Const, dest: "v1", const_type: Int, value: Int(2) }), Instruction(Value { op: Add, dest: "v2", op_type: Int, args: ["v0", "v1"], funcs: [], labels: [] }), Instruction(Effect { op: Print, args: ["v2"], funcs: [], labels: [] })]

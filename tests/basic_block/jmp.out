@@ -1,0 +1,4 @@
+main:
+[Instruction(Constant { op: Const, dest: "v", const_type: Int, value: Int(4) }), Instruction(Effect { op: Jump, args: [], funcs: [], labels: ["somewhere"] })]
+[Instruction(Constant { op: Const, dest: "v", const_type: Int, value: Int(2) })]
+[Label { label: "somewhere" }, Instruction(Effect { op: Print, args: ["v"], funcs: [], labels: [] })]

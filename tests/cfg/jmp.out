@@ -1,0 +1,9 @@
+digraph main {
+  node [shape=box];
+  bb0;
+  bb1;
+  somewhere;
+  bb0 -> { somewhere }
+  bb1 -> { somewhere }
+  somewhere -> {  }
+}
