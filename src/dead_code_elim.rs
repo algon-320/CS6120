@@ -6,16 +6,18 @@ pub fn local(block: &[Code]) -> Vec<Code> {
     let mut assign = HashMap::new();
 
     for code in instrs.iter_mut() {
-        if let Code::Instruction(ins) = code.as_ref().unwrap() {
-            if let Instruction::Value { args, .. } | Instruction::Effect { args, .. } = ins {
-                for arg in args {
-                    assign.remove(arg);
-                }
+        let ins = match code.as_ref().unwrap() {
+            Code::Label { .. } => continue,
+            Code::Instruction(ins) => ins,
+        };
+        if let Instruction::Value { args, .. } | Instruction::Effect { args, .. } = ins {
+            for arg in args {
+                assign.remove(arg);
             }
-            if let Instruction::Value { dest, .. } | Instruction::Constant { dest, .. } = ins {
-                if let Some(old) = assign.insert(dest.clone(), code) {
-                    old.take();
-                }
+        }
+        if let Instruction::Value { dest, .. } | Instruction::Constant { dest, .. } = ins {
+            if let Some(old) = assign.insert(dest.clone(), code) {
+                old.take();
             }
         }
     }
