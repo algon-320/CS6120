@@ -20,12 +20,14 @@ pub struct CfgNode {
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cfg {
+    pub entry: String,
     pub nodes: HashMap<String, CfgNode>,
 }
 impl Cfg {
     #[allow(dead_code)]
     pub fn build(blocks: &[Vec<Code>]) -> Cfg {
         let mut nodes: HashMap<String, CfgNode> = HashMap::new();
+        let mut entry: Option<String> = None;
 
         let mut pred_name = None;
         for b in blocks.iter().filter(|b| !b.is_empty()) {
@@ -59,6 +61,9 @@ impl Cfg {
                     prev: HashSet::new(),
                 },
             );
+            if entry.is_none() {
+                entry = Some(name.clone());
+            }
 
             pred_name = match b.last() {
                 Some(Code::Instruction(ins)) if is_terminator(ins) => None,
@@ -66,7 +71,10 @@ impl Cfg {
             };
         }
 
-        let mut cfg = Cfg { nodes };
+        let mut cfg = Cfg {
+            entry: entry.expect("empty cfg"),
+            nodes,
+        };
         cfg.refresh_prev();
         cfg
     }
@@ -75,7 +83,7 @@ impl Cfg {
         let mut prev_map: HashMap<String, HashSet<String>> = HashMap::new();
         for (name, node) in self.nodes.iter() {
             for nx in node.next.iter() {
-                if prev_map.contains_key(nx) {
+                if !prev_map.contains_key(nx) {
                     prev_map.insert(nx.to_owned(), HashSet::new());
                 }
                 let prev = prev_map.get_mut(nx).unwrap();
