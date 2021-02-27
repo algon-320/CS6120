@@ -1,5 +1,5 @@
 use bril_rs::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::basic_block::is_terminator;
 
@@ -15,7 +15,8 @@ fn extract_label(block: &[Code]) -> (Option<String>, &[Code]) {
 pub struct CfgNode {
     pub name: String,
     pub block: Vec<Code>,
-    pub next: Vec<String>,
+    pub prev: HashSet<String>,
+    pub next: HashSet<String>,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cfg {
@@ -46,7 +47,7 @@ impl Cfg {
                 .take()
                 .and_then(|pred_name| nodes.get_mut(&pred_name))
             {
-                pred.next.push(name.clone());
+                pred.next.insert(name.clone());
             }
 
             nodes.insert(
@@ -55,6 +56,7 @@ impl Cfg {
                     name: name.clone(),
                     block: b.to_vec(),
                     next,
+                    prev: HashSet::new(),
                 },
             );
 
@@ -64,6 +66,25 @@ impl Cfg {
             };
         }
 
-        Cfg { nodes }
+        let mut cfg = Cfg { nodes };
+        cfg.refresh_prev();
+        cfg
+    }
+
+    fn refresh_prev(&mut self) {
+        let mut prev_map: HashMap<String, HashSet<String>> = HashMap::new();
+        for (name, node) in self.nodes.iter() {
+            for nx in node.next.iter() {
+                if prev_map.contains_key(nx) {
+                    prev_map.insert(nx.to_owned(), HashSet::new());
+                }
+                let prev = prev_map.get_mut(nx).unwrap();
+                prev.insert(name.to_owned());
+            }
+        }
+        for (name, prev) in prev_map {
+            let node = self.nodes.get_mut(&name).unwrap();
+            node.prev = prev;
+        }
     }
 }
